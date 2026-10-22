@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string &&
+        data.userId == userId &&
+        data.userId == request.auth.uid &&
+        data.email is string &&
+        data.email.size() <= 200;
+    }
+
+    function isValidProduct(data, userId) {
+      return data.userId is string &&
+        data.userId == userId &&
+        data.userId == request.auth.uid &&
+        data.productName is string &&
+        data.productName.size() >= 1 &&
+        data.productName.size() <= 120 &&
+        data.brand is string &&
+        data.brand.size() >= 1 &&
+        data.brand.size() <= 100 &&
+        data.price is number &&
+        data.price >= 0 &&
+        data.purchaseDate is number &&
+        data.warrantyMonths is number &&
+        data.warrantyMonths >= 1 &&
+        data.warrantyMonths <= 240 &&
+        data.expiryDate is number &&
+        (data.get('invoicePath', null) == null || data.get('invoicePath', null) is string) &&
+        (data.get('invoiceName', null) == null || data.get('invoiceName', null) is string);
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().userId == existing().userId;
+      allow delete: if false;
+
+      // Products subcollection
+      match /products/{productId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          isValidId(productId) &&
+          isValidProduct(incoming(), userId);
+        allow update: if isOwner(userId) &&
+          isValidId(productId) &&
+          isValidProduct(incoming(), userId) &&
+          incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(productId);
+      }
+    }
+  }
+}

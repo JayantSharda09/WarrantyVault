@@ -1,0 +1,8 @@
+{
+  "name": "WarrantyVault",
+  "description": "Your bills and warranties in one place. Track purchases, warranty periods, expiry reminders, and invoice receipts.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

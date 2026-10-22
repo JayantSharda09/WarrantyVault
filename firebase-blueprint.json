@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A consumer product with warranty coverage, purchase details, and optional invoice image.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product document ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this product record."
+        },
+        "productName": {
+          "type": "string",
+          "description": "Name of the product.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "brand": {
+          "type": "string",
+          "description": "Manufacturer or brand of the product.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "price": {
+          "type": "number",
+          "description": "Purchase price of the product."
+        },
+        "purchaseDate": {
+          "type": "number",
+          "description": "Timestamp in milliseconds when the product was purchased."
+        },
+        "warrantyMonths": {
+          "type": "number",
+          "description": "Warranty duration in months."
+        },
+        "expiryDate": {
+          "type": "number",
+          "description": "Timestamp in milliseconds when warranty coverage expires."
+        },
+        "invoicePath": {
+          "type": "string",
+          "description": "Image data URI or storage link of the invoice receipt."
+        },
+        "invoiceName": {
+          "type": "string",
+          "description": "Original file name of the invoice.",
+          "maxLength": 120
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "userId",
+        "productName",
+        "brand",
+        "price",
+        "purchaseDate",
+        "warrantyMonths",
+        "expiryDate"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Basic user profile information.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The auth UID of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's registered email address."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account registration timestamp."
+        }
+      },
+      "required": [
+        "userId",
+        "email"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document storing basic account state."
+    },
+    "/users/{userId}/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of products and warranty records owned by the user."
+    }
+  }
+}
